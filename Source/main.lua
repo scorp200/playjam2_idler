@@ -6,7 +6,7 @@ import "CoreLibs/timer"
 local gfx <const> = playdate.graphics
 local font = gfx.font.new('fonts/whiteglove-stroked')
 
-power = 0
+power = 1
 lastUpdate = 0
 
 upgrades = {
@@ -20,16 +20,21 @@ upgrades = {
 function init()
     local inputHandlers = {
         cranked = function(change, accel)
-            power = power + change / 100
+            power = power + math.abs(change) / 100
         end
     }
 
     playdate.inputHandlers.push(inputHandlers)
+
+    gfx.setFont(font)
 end
 
 init()
 
 function playdate.update()
+    gfx.sprite.update()
+    playdate.timer.updateTimers()
+
     local currentTime = playdate.getCurrentTimeMilliseconds()
     local deltaTime = (currentTime - lastUpdate) / 1000
     lastUpdate = currentTime
@@ -40,16 +45,29 @@ function playdate.update()
 
         -- draw code goes next
     end
+
+    gfx.drawText('power: ' .. formatDigits(power) .. 'w/s', 2, 30)
 end
 
+local formatTable <const> = {
+    [0] = '',
+    [1] = 'k',
+    [2] = 'm',
+    [3] = 'g',
+    [4] = 't',
+    [5] = 'p',
+    [6] = 'e',
+    [7] = 'z',
+    [8] = 'y',
+    [9] = 'q',
+}
+
 function formatDigits(n)
-    if n >= 10 ^ 9 then
-        return string.format("%.2fgw", n / 10 ^ 9)
-    elseif n >= 10 ^ 6 then
-        return string.format("%.2fmw", n / 10 ^ 6)
-    elseif n >= 10 ^ 3 then
-        return string.format("%.2fkw", n / 10 ^ 3)
-    else
-        return string.format("%.0fw", n)
-    end
+    local pow = math.floor(math.log(n, 10))
+    local index = math.floor(pow / 3)
+    return string.format('%.2f' .. formatTable[index], n / 10 ^ pow)
+end
+
+function getCost(base, count)
+    return base * (1.15 ^ count)
 end
