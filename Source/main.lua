@@ -75,7 +75,15 @@ function init()
         for y = 1, 3, 1 do
             local x_pos = border_w * (x - 1) + border_w / 2 + 5 + 3.5 * x
             local y_pos = border_h * (y - 1) + border_h / 2 + 6 + 2 * y
+            local index = x * 3 + y
             local button = UIButton(x_pos, y_pos, border_unselected, border_selected)
+            print(index)
+            local img = gfx.image.new('img/' .. upgrades[index - 3].name .. '.png'):scaledImage(2)
+            local sprt = gfx.sprite.new()
+            sprt:setImage(img)
+            sprt:moveTo(x_pos - border_w / 4, y_pos)
+            sprt:setZIndex(11)
+            sprt:add()
             buttons[x][y] = button
         end
     end

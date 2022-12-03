@@ -16,7 +16,7 @@ function UIButton:init(x, y, image, imageSelected)
     self.sprite = gfx.sprite.new()
     self.sprite:setImage(self.image)
     self.sprite:moveTo(x, y)
-    self.sprite:setZIndex(2000)
+    self.sprite:setZIndex(10)
     self.sprite:add()
 end
 
