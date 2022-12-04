@@ -10,6 +10,11 @@ local font = gfx.font.new('fonts/whiteglove-stroked')
 power = 1
 lastUpdate = 0
 
+selected = {
+    x = 1,
+    y = 1
+}
+
 buttons = {}
 
 
@@ -18,44 +23,44 @@ upgrades = {
         name = 'wind',
         count = 0,
         base = 10,
-        generates = 1
+        generates = 0.5
     },
     [2] = {
         name = 'hydro',
         count = 0,
-        base = 100,
-        generates = 2
+        base = 200,
+        generates = 5
     },
     [3] = {
         name = 'coal',
         count = 0,
         base = 1000,
-        generates = 5
+        generates = 35
     },
     [4] = {
         name = 'solar',
         count = 0,
         base = 10000,
-        generates = 10
+        generates = 250
     },
     [5] = {
         name = 'nuclear',
         count = 0,
         base = 100000,
-        generates = 25
+        generates = 1100
     },
     [6] = {
         name = 'dyson',
         count = 0,
         base = 5000000,
-        generates = 100
+        generates = 25000
     }
 }
 
 function init()
     local inputHandlers = {
         cranked = function(change, accel)
-            power = power + math.abs(change) / 10
+            power = power + math.abs(change) / 100
         end
     }
 
@@ -91,6 +96,7 @@ function init()
             sprt:add()
 
             upgrades[index].sprite = sprt
+            button.data = upgrades[index]
         end
     end
 
@@ -105,17 +111,54 @@ function playdate.update()
     gfx.sprite.update()
     playdate.timer.updateTimers()
 
+    if playdate.buttonJustPressed(playdate.kButtonUp) and selected.y > 1 then
+        selected.y = selected.y - 1
+    elseif playdate.buttonJustPressed(playdate.kButtonDown) and selected.y <= 2 then
+        selected.y = selected.y + 1
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonLeft) and selected.x > 1 then
+        selected.x = selected.x - 1
+    elseif playdate.buttonJustPressed(playdate.kButtonRight) and selected.x < 2 then
+        selected.x = selected.x + 1
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonA) then
+        local upgrade = buttons[selected.x][selected.y].data
+        local cost = getCost(upgrade.base, upgrade.count)
+
+        if cost <= power then
+            upgrade.count = upgrade.count + 1
+            power = power - cost
+        end
+    elseif playdate.buttonJustPressed(playdate.kButtonB) then
+        local upgrade = buttons[selected.x][selected.y].data
+        local cost = getCost(upgrade.base, upgrade.count)
+
+            upgrade.count = upgrade.count + 1
+    end
+
+    for x = 1, 2, 1 do
+        for y = 1, 3, 1 do
+            buttons[x][y]:setSelected(x == selected.x and y == selected.y)
+        end
+    end
+
     local currentTime = playdate.getCurrentTimeMilliseconds()
     local deltaTime = (currentTime - lastUpdate) / 1000
     lastUpdate = currentTime
 
     for k, v in pairs(upgrades) do
-        local produce = v.generates * v.count
-        power = power + produce * deltaTime
+        local produce = getProduce(v.generates, v.count) * deltaTime
+        power = power + produce
 
         -- draw code goes next
 
-        gfx.drawText('price: ' .. formatDigits(getCost(v.base, v.count)) .. 'w/s', v.sprite.x + 30, v.sprite.y - 20)
+        gfx.drawText(v.name .. ' x' .. v.count, v.sprite.x + 30, v.sprite.y - 25)
+        gfx.drawText('price: ' .. formatDigits(getCost(v.base, v.count)) .. 'w/s', v.sprite.x + 30, v.sprite.y - 10)
+        if produce > 0 then
+            gfx.drawText('+ ' .. formatDigits(produce / deltaTime) .. 'w/s', v.sprite.x + 30, v.sprite.y + 5)
+        end
     end
 
     gfx.drawTextAligned(formatDigits(power) .. 'w/s', 200, 210, kTextAlignment.center)
@@ -137,9 +180,36 @@ local formatTable <const> = {
 function formatDigits(n)
     local pow = math.floor(math.log(n, 10))
     local index = math.floor(pow / 3)
-    return string.format('%.2f' .. formatTable[index], n / 10 ^ (index * 3))
+    if index < 0 then
+        index = 0
+    end
+    if pow % 3 ~= 0 and n > 1 then
+        return string.format('%.0f' .. formatTable[index], n / 10 ^ (index * 3))
+    else
+        return string.format('%.2f' .. formatTable[index], n / 10 ^ (index * 3))
+    end
 end
 
 function getCost(base, count)
     return base * (1.15 ^ count)
+end
+
+local bonusTable <const> = {
+    [0] = 0,
+    [1] = 1,
+    [2] = 1,
+    [3] = 1.5,
+    [4] = 1.5,
+    [5] = 1.5,
+    [6] = 2,
+    [7] = 3,
+}
+
+function getProduce(generates, count)
+    local level = math.floor(count / 25)
+    local bonus = 1
+    for i = 0, level, 1 do
+        bonus = bonus + bonusTable[i]
+    end
+    return generates * count * bonus
 end
