@@ -1,5 +1,6 @@
 # Compiled Lua sources
 luac.out
+output.pdx
 
 # luarocks build files
 *.src.rock

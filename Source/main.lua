@@ -12,6 +12,7 @@ lastUpdate = 0
 
 buttons = {}
 
+
 upgrades = {
     [1] = {
         name = 'wind',
@@ -66,7 +67,7 @@ function init()
     local infoBarImg = gfx.image.new('img/bottom_bar.png')
     infoBarImg:drawScaled(8, 200, 2)
 
-    local border_unselected = gfx.image.new('img/border_unselected.png'):scaledImage(2)
+    local border_unselected = gfx.image.new('img/border_unselected_alt.png'):scaledImage(2)
     local border_selected = gfx.image.new('img/border_selected_0.png'):scaledImage(2)
     local border_w, border_h = border_unselected:getSize()
 
@@ -75,16 +76,21 @@ function init()
         for y = 1, 3, 1 do
             local x_pos = border_w * (x - 1) + border_w / 2 + 5 + 3.5 * x
             local y_pos = border_h * (y - 1) + border_h / 2 + 6 + 2 * y
-            local index = x * 3 + y
+            local index = x * 3 + y - 3
+
             local button = UIButton(x_pos, y_pos, border_unselected, border_selected)
-            print(index)
-            local img = gfx.image.new('img/' .. upgrades[index - 3].name .. '.png'):scaledImage(2)
+            buttons[x][y] = button
+
+            local img = gfx.image.new('img/' .. upgrades[index].name .. '.png'):scaledImage(2)
+            local img_w = img:getSize()
+
             local sprt = gfx.sprite.new()
             sprt:setImage(img)
-            sprt:moveTo(x_pos - border_w / 4, y_pos)
+            sprt:moveTo(x_pos - border_w / 4 - img_w / 4, y_pos)
             sprt:setZIndex(11)
             sprt:add()
-            buttons[x][y] = button
+
+            upgrades[index].sprite = sprt
         end
     end
 
@@ -108,9 +114,11 @@ function playdate.update()
         power = power + produce * deltaTime
 
         -- draw code goes next
+
+        gfx.drawText('price: ' .. formatDigits(getCost(v.base, v.count)) .. 'w/s', v.sprite.x + 30, v.sprite.y - 20)
     end
 
-    gfx.drawText('power: ' .. formatDigits(power) .. 'w/s', 2, 30)
+    gfx.drawTextAligned(formatDigits(power) .. 'w/s', 200, 210, kTextAlignment.center)
 end
 
 local formatTable <const> = {
