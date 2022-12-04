@@ -135,7 +135,7 @@ function playdate.update()
         local upgrade = buttons[selected.x][selected.y].data
         local cost = getCost(upgrade.base, upgrade.count)
 
-            upgrade.count = upgrade.count + 1
+        upgrade.count = upgrade.count + 1
     end
 
     for x = 1, 2, 1 do
@@ -206,10 +206,14 @@ local bonusTable <const> = {
 }
 
 function getProduce(generates, count)
-    local level = math.floor(count / 25)
+    local level = math.floor(count / 10)
     local bonus = 1
     for i = 0, level, 1 do
-        bonus = bonus + bonusTable[i]
+        if i < #bonusTable then
+            bonus = bonus + bonusTable[i]
+        else
+            bonus = bonus + 3
+        end
     end
     return generates * count * bonus
 end
