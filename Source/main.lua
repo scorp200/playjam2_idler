@@ -15,6 +15,9 @@ selected = {
     y = 1
 }
 
+title = nil
+state = 0
+
 buttons = {}
 
 
@@ -66,11 +69,16 @@ function init()
 
     playdate.inputHandlers.push(inputHandlers)
 
-    local bgImg = gfx.image.new('img/background_white.png')
-    bgImg:drawScaled(0, 0, 2)
+    local bg = gfx.sprite.new()
+    bg:setImage(gfx.image.new('img/background_white.png'), 0, 2)
+    bg:setCenter(0, 0)
+    bg:add()
 
-    local infoBarImg = gfx.image.new('img/bottom_bar.png')
-    infoBarImg:drawScaled(8, 200, 2)
+    local info = gfx.sprite.new()
+    info:setImage(gfx.image.new('img/bottom_bar.png'), 0, 2)
+    info:setCenter(0, 0)
+    info:moveTo(8, 200)
+    info:add()
 
     local border_unselected = gfx.image.new('img/border_unselected_alt.png'):scaledImage(2)
     local border_selected = gfx.image.new('img/border_selected_0.png'):scaledImage(2)
@@ -98,9 +106,14 @@ function init()
             upgrades[index].sprite = sprt
             button.data = upgrades[index]
         end
+
     end
 
-    --local button = UIButton(103, 40, border_unselected, border_selected)
+    title = gfx.sprite.new()
+    title:setImage(gfx.image.new('img/title.png'), 0, 2)
+    title:setCenter(0, 0)
+    title:setZIndex(20)
+    title:add()
 
     gfx.setFont(font)
 end
@@ -110,6 +123,15 @@ init()
 function playdate.update()
     gfx.sprite.update()
     playdate.timer.updateTimers()
+
+    if state == 0 then
+        gfx.drawTextAligned('Press A to start', 200, 210, kTextAlignment.center)
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            title:remove()
+            state = 1
+        end
+        return
+    end
 
     if playdate.buttonJustPressed(playdate.kButtonUp) and selected.y > 1 then
         selected.y = selected.y - 1
