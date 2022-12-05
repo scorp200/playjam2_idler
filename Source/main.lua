@@ -7,7 +7,7 @@ import "lib/uibutton"
 local gfx <const> = playdate.graphics
 local font = gfx.font.new('fonts/whiteglove-stroked')
 
-power = 1
+power = 0
 lastUpdate = 0
 
 selected = {
