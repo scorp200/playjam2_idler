@@ -26,37 +26,43 @@ upgrades = {
         name = 'wind',
         count = 0,
         base = 10,
-        generates = 0.5
+        generates = 0.5,
+        produce = 0
     },
     [2] = {
         name = 'hydro',
         count = 0,
         base = 200,
-        generates = 5
+        generates = 5,
+        produce = 0
     },
     [3] = {
         name = 'coal',
         count = 0,
         base = 1000,
-        generates = 35
+        generates = 35,
+        produce = 0
     },
     [4] = {
         name = 'solar',
         count = 0,
         base = 10000,
-        generates = 250
+        generates = 250,
+        produce = 0
     },
     [5] = {
         name = 'nuclear',
         count = 0,
         base = 100000,
-        generates = 1100
+        generates = 1100,
+        produce = 0
     },
     [6] = {
         name = 'dyson',
         count = 0,
         base = 5000000,
-        generates = 25000
+        generates = 25000,
+        produce = 0
     }
 }
 
@@ -152,12 +158,8 @@ function playdate.update()
         if cost <= power then
             upgrade.count = upgrade.count + 1
             power = power - cost
+            upgrade.produce = getProduce(upgrade.generates, upgrade.count)
         end
-    elseif playdate.buttonJustPressed(playdate.kButtonB) then
-        local upgrade = buttons[selected.x][selected.y].data
-        local cost = getCost(upgrade.base, upgrade.count)
-
-        upgrade.count = upgrade.count + 1
     end
 
     for x = 1, 2, 1 do
@@ -170,19 +172,20 @@ function playdate.update()
     local deltaTime = (currentTime - lastUpdate) / 1000
     lastUpdate = currentTime
 
-    for k, v in pairs(upgrades) do
-        local produce = getProduce(v.generates, v.count) * deltaTime
-        power = power + produce
+    local totalProduce = 0
 
-        -- draw code goes next
+    for k, v in pairs(upgrades) do
+        totalProduce = totalProduce + v.produce
+        power = power + v.produce * deltaTime
 
         gfx.drawText(v.name .. ' x' .. v.count, v.sprite.x + 30, v.sprite.y - 25)
         gfx.drawText('price: ' .. formatDigits(getCost(v.base, v.count)) .. 'w/s', v.sprite.x + 30, v.sprite.y - 10)
-        if produce > 0 then
-            gfx.drawText('+ ' .. formatDigits(produce / deltaTime) .. 'w/s', v.sprite.x + 30, v.sprite.y + 5)
+        if v.produce > 0 then
+            gfx.drawText('+ ' .. formatDigits(v.produce) .. 'w/s', v.sprite.x + 30, v.sprite.y + 5)
         end
     end
 
+    gfx.drawTextAligned(formatDigits(totalProduce) .. 'w/s', 37, 210, kTextAlignment.left)
     gfx.drawTextAligned(formatDigits(power) .. 'w/s', 200, 210, kTextAlignment.center)
 end
 
