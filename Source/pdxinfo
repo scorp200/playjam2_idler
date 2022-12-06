@@ -1,6 +1,6 @@
 name=IdleSurge
 description=An Idle game where you generate electricity
-bundleID=xyz.aidoge.IdleSurge
+bundleID=xyz.aidoge.idlesurge
 version=0.1
 buildNumber=1
 imagePath=img/card.png
