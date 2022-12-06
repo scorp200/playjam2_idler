@@ -2,6 +2,9 @@
 luac.out
 *.pdx
 
+# MacOS
+.DS_Store
+
 # luarocks build files
 *.src.rock
 *.zip
